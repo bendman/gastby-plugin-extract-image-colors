@@ -15,7 +15,10 @@ const getHex = rgb => {
   }).hex()
 }
 
-exports.onCreateNode = async ({ node, actions }, pluginOptions) => {
+exports.onCreateNode = async ({
+  node,
+  actions: { createNodeField }
+}, pluginOptions) => {
   const options = Object.assign({}, { ...defaultOptions, ...pluginOptions })
   if (
     options &&
@@ -24,19 +27,21 @@ exports.onCreateNode = async ({ node, actions }, pluginOptions) => {
     options.extensions.indexOf(node.extension) !== -1 &&
     options.exclude.indexOf(`${node.name}${node.ext}`) === -1
   ) {
-    // Transform the new node here and create a new node or
-    // create a new node field.
-    await Vibrant.from(node.absolutePath).getPalette((err, palette) => {
-      const colors = {
-        vibrant: getHex(palette.Vibrant._rgb),
-        darkVibrant: getHex(palette.DarkVibrant._rgb),
-        lightVibrant: getHex(palette.LightVibrant._rgb),
-        muted: getHex(palette.Muted._rgb),
-        darkMuted: getHex(palette.DarkMuted._rgb),
-        lightMuted: getHex(palette.LightMuted._rgb)
-      }
-      node.colors = colors
-    })
+    // Extract colors from image
+    const palette = await Vibrant.from(node.absolutePath).getPalette();
+
+    const colors = {
+      vibrant: getHex(palette.Vibrant._rgb),
+      darkVibrant: getHex(palette.DarkVibrant._rgb),
+      lightVibrant: getHex(palette.LightVibrant._rgb),
+      muted: getHex(palette.Muted._rgb),
+      darkMuted: getHex(palette.DarkMuted._rgb),
+      lightMuted: getHex(palette.LightMuted._rgb)
+    };
+
+    // Create the new `colors` field
+    createNodeField({node, name: 'colors', value: colors});
+    return node;
   }
 }
 

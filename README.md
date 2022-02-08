@@ -64,8 +64,17 @@ const query = graphql`
       publicURL
       extension
       publicURL
-      colors {
+      fields: {
         ...GatsbyImageColors
+        # Adds these fields:
+        # colors {
+        #   vibrant
+        #   darkVibrant
+        #   lightVibrant
+        #   muted
+        #   darkMuted
+        #   lightMuted
+        # }
       }
       childImageSharp {
         fluid(maxWidth: 2500) {
@@ -79,7 +88,7 @@ const query = graphql`
 const ImageWithBackground = () => {
   const data = useStaticQuery(query)
   return (
-    <div style={{ backgroundColor: data.file.colors.vibrant, height: '100vh' }}>
+    <div style={{ backgroundColor: data.file.fields.colors.vibrant, height: '100vh' }}>
       <Img fluid={data.file.childImageSharp.fluid} />
     </div>
   )
